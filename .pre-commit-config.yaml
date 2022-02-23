@@ -1,0 +1,32 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 21.12b0
+    hooks:
+    -   id: black
+-   repo: local
+    hooks:
+    -   id: isort
+        name: isort
+        entry: isort --profile black
+        language: system
+        types: [python]
+        stages: [commit]
+    -   id: flake8
+        name: flake8
+        language: system
+        entry: flake8 --max-line-length=88 --extend-ignore=E203
+        types: [python]
+        stages: [commit]
+    -   id: pytest
+        name: pytest
+        language: system
+        entry: pytest
+        pass_filenames: false
+        always_run: true
+        stages: [push]
