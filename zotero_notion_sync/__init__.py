@@ -75,7 +75,7 @@ def notion_page_to_paper(page: dict) -> Paper:
     return Paper(
         title=notion_object_to_str(props[TITLE]),
         authors=notion_object_to_str(props[AUTHORS]),
-        published_at=notion_object_to_str(props[PUBLISHED_AT]),
+        published_at=notion_object_to_str(props[PUBLISHED_AT]) or None,
         zotero_url=notion_object_to_str(props[ZOTERO_URL]),
         zotero_item_id=notion_object_to_str(props[ZOTERO_ITEM_ID]),
         link=notion_object_to_str(props[LINK]),
