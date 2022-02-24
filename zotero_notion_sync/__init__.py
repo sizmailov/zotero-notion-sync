@@ -25,7 +25,7 @@ class Paper:
     title: str
     authors: str
     link: Optional[str]
-    published_at: str
+    published_at: Optional[str]
     zotero_url: str
     zotero_item_id: str
     notion_id: Optional[str]
@@ -96,35 +96,33 @@ def to_rich_text_dict(s: str):
 
 
 def create_notion_page(notion: Client, db_id: str, paper: Paper) -> Paper:
-    properties = {
-        TITLE: {"title": [{"text": {"content": paper.title}}]},
-        AUTHORS: to_rich_text_dict(paper.authors),
-        PUBLISHED_AT: {"date": {"start": str(paper.published_at)}},
-        ZOTERO_URL: {"url": paper.zotero_url},
-        ZOTERO_ITEM_ID: to_rich_text_dict(paper.zotero_item_id),
-    }
-    if paper.link:
-        properties[LINK] = {"url": paper.link}
-
     return notion_page_to_paper(
-        notion.pages.create(parent={"database_id": db_id}, properties=properties)
+        notion.pages.create(
+            parent={"database_id": db_id}, properties=paper_to_notion_properties(paper)
+        )
     )
 
 
 def update_notion_page(notion: Client, paper: Paper) -> Paper:
+    return notion_page_to_paper(
+        notion.pages.update(
+            page_id=paper.notion_id, properties=paper_to_notion_properties(paper)
+        )
+    )
+
+
+def paper_to_notion_properties(paper):
     properties = {
         TITLE: {"title": [{"text": {"content": paper.title}}]},
         AUTHORS: to_rich_text_dict(paper.authors),
-        PUBLISHED_AT: {"date": {"start": str(paper.published_at)}},
         ZOTERO_URL: {"url": paper.zotero_url},
         ZOTERO_ITEM_ID: to_rich_text_dict(paper.zotero_item_id),
     }
     if paper.link:
         properties[LINK] = {"url": paper.link}
-
-    return notion_page_to_paper(
-        notion.pages.update(page_id=paper.notion_id, properties=properties)
-    )
+    if paper.published_at:
+        properties[PUBLISHED_AT] = {"date": {"start": str(paper.published_at)}}
+    return properties
 
 
 def get_all_pages(notion: Client, db_id: str) -> list:
@@ -141,6 +139,18 @@ def zotero_key_to_url(key: str) -> str:
     return f"zotero://select/library/items/{key}"
 
 
+def zotero_author_to_str(author: dict) -> str:
+    if "name" in author:
+        return author["name"]
+    return author["firstName"] + " " + author["lastName"]
+
+
+def zotero_to_datetime_str(dt: str) -> Optional[str]:
+    t = pd.to_datetime(dt)
+    if not pd.isnull(t):
+        return str(t.date())
+
+
 def zotero_item_to_paper(item: dict) -> Optional[Paper]:
     data = item["data"]
     key = item["key"]
@@ -149,11 +159,11 @@ def zotero_item_to_paper(item: dict) -> Optional[Paper]:
         zotero_item_id=key,
         zotero_url=zotero_key_to_url(key),
         authors=", ".join(
-            author["firstName"] + " " + author["lastName"]
+            zotero_author_to_str(author)
             for author in data["creators"]
             if author["creatorType"] == "author"
         ),
-        published_at=str(pd.to_datetime(data["date"]).date()),
+        published_at=zotero_to_datetime_str(data["date"]),
         link=data["url"],
         notion_id=None,
     )
