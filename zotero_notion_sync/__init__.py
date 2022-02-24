@@ -203,17 +203,14 @@ def find_notion_id(text: str):
 
 
 def get_all_zotero_papers(zotero: Zotero) -> List[Paper]:
-    all_items = zotero.items()
+    all_notes = zotero.everything(zotero.items(itemType="note"))
 
     top_papers = {
         item["data"]["key"]: zotero_item_to_paper(item) for item in zotero.all_top()
     }
 
-    for item in all_items:
-        if (
-            item["data"]["itemType"] == "note"
-            and [{"tag": "notion-link"}] == item["data"]["tags"]
-        ):
+    for item in all_notes:
+        if [{"tag": "notion-link"}] == item["data"]["tags"]:
             parent_item_id = item["data"]["parentItem"]
             if parent_item_id in top_papers:
                 top_papers[parent_item_id].notion_id = find_notion_id(
