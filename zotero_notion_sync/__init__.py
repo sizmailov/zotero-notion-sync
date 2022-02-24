@@ -135,8 +135,10 @@ def get_all_pages(notion: Client, db_id: str) -> list:
     return pages
 
 
-def zotero_key_to_url(key: str) -> str:
-    return f"zotero://select/library/items/{key}"
+def zotero_item_to_url(item: dict) -> str:
+    key = item["key"]
+    group_id = item["library"]["id"]
+    return f"zotero://select/groups/{group_id}/items/{key}"
 
 
 def zotero_author_to_str(author: dict) -> str:
@@ -157,7 +159,7 @@ def zotero_item_to_paper(item: dict) -> Optional[Paper]:
     return Paper(
         title=data["title"],
         zotero_item_id=key,
-        zotero_url=zotero_key_to_url(key),
+        zotero_url=zotero_item_to_url(item),
         authors=", ".join(
             zotero_author_to_str(author)
             for author in data["creators"]
