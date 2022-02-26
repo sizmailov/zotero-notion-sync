@@ -138,7 +138,7 @@ def get_all_pages(notion: Client, db_id: str) -> list:
 def zotero_item_to_url(item: dict) -> str:
     key = item["key"]
     group_id = item["library"]["id"]
-    return f"zotero://select/groups/{group_id}/items/{key}"
+    return f"https://open-zotero.xyz/select/groups/{group_id}/items/{key}"
 
 
 def zotero_author_to_str(author: dict) -> str:
