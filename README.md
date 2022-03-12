@@ -85,7 +85,7 @@ sudo systemctl start sync-zotero-notion.timer
 sudo systemctl enable sync-zotero-notion.timer
 ``` 
 
-<details><summary><code>sync-zotero-notion.service</code></symmary>
+<details><summary><code>sync-zotero-notion.service</code></summary>
 
 ```
 # TODO: replace `<USERNAME>` with actual user name
@@ -104,7 +104,7 @@ ExecStart=/home/<USERNAME>/venv/bin/sync-zotero-notion --config=/home/<USERNAME>
 </details>
 
 
-<details><summary><code>sync-zotero-notion.timer</code></symmary>
+<details><summary><code>sync-zotero-notion.timer</code></summary>
 
 ```
 [Unit]
