@@ -73,3 +73,49 @@ pre-commit install
 # Pre-commit hooks
 pre-commit run --all-files
 ```
+
+### Integration with systemd
+
+
+1. Create two files `sync-zotero-notion.*` in `/etc/systemd/system/` using template below.
+2. Activate sync via 
+
+```bash
+sudo systemctl start sync-zotero-notion.timer
+sudo systemctl enable sync-zotero-notion.timer
+``` 
+
+<details><summary><code>sync-zotero-notion.service</code></symmary>
+
+```
+# TODO: replace `<USERNAME>` with actual user name
+[Unit]
+Description=Sync Notion with Zotero
+After=network.target network-online.target
+
+[Service]
+User=<USERNAME>
+Group=<USERNAME>
+Type=simple
+ExecStart=/home/<USERNAME>/venv/bin/sync-zotero-notion --config=/home/<USERNAME>/config.yml
+```
+
+
+</details>
+
+
+<details><summary><code>sync-zotero-notion.timer</code></symmary>
+
+```
+[Unit]
+Description=Sync Notion with Zotero
+
+[Timer]
+OnUnitInactiveSec=1m
+OnBootSec=2m
+
+[Install]
+WantedBy=timers.target
+```
+
+</details>
