@@ -128,10 +128,12 @@ def paper_to_notion_properties(paper):
 def get_all_pages(notion: Client, db_id: str) -> list:
     result = notion.databases.query(db_id)
     pages = result["results"]
+    next_cursor = result.get("next_cursor")
 
-    while result.get("next_cursor") is not None:
-        result = notion.databases.query(db_id)
-        pages.append(result["results"])
+    while next_cursor is not None:
+        result = notion.databases.query(db_id, start_cursor=next_cursor)
+        pages.extend(result["results"])
+        next_cursor = result.get("next_cursor")
     return pages
 
 
