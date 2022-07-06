@@ -83,13 +83,21 @@ def notion_page_to_paper(page: dict) -> Paper:
     )
 
 
-def to_rich_text_dict(s: str):
+def truncate_text(text: str, limit: int = 2000) -> str:
+    """Notion imposes limit on rich text length"""
+    if len(text) <= limit:
+        return text
+    logging.warning(f"Text truncated to {limit} symbols: `{text[:16]}...`")
+    return text[: limit - 3] + "..."
+
+
+def to_rich_text_dict(text: str):
     return {
         "type": "rich_text",
         "rich_text": [
             {
                 "type": "text",
-                "text": {"content": s},
+                "text": {"content": truncate_text(text)},
             },
         ],
     }
