@@ -78,12 +78,12 @@ pre-commit run --all-files
 
 
 1. Create two files `sync-zotero-notion.*` in `/etc/systemd/system/` using template below.
-2. Activate sync via 
+2. Activate sync via
 
 ```bash
 sudo systemctl start sync-zotero-notion.timer
 sudo systemctl enable sync-zotero-notion.timer
-``` 
+```
 
 <details><summary><code>sync-zotero-notion.service</code></summary>
 
