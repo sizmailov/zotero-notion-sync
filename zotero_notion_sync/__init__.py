@@ -111,10 +111,10 @@ def create_notion_page(notion: Client, db_id: str, paper: Paper) -> Paper:
     )
 
 
-def update_notion_page(notion: Client, paper: Paper) -> Paper:
+def update_notion_page(notion: Client, paper: Paper, page_id: str) -> Paper:
     return notion_page_to_paper(
         notion.pages.update(
-            page_id=paper.notion_id, properties=paper_to_notion_properties(paper)
+            page_id=page_id, properties=paper_to_notion_properties(paper)
         )
     )
 
@@ -251,7 +251,9 @@ def synchronize(zotero: Zotero, notion: Client, database_id: str):
         elif paper != notion_paper:
             if not paper.zotero_eq(notion_paper):
                 logging.info(f"Update notion page: {paper.zotero_item_id}...")
-                notion_paper = update_notion_page(notion, paper=paper)
+                notion_paper = update_notion_page(
+                    notion, paper=paper, page_id=notion_paper.notion_id
+                )
             if paper.notion_id != notion_paper.notion_id:
                 logging.info(f"Update zotero note: {paper.zotero_item_id}...")
                 update_zotero_notion_note(notion_paper, zotero)
