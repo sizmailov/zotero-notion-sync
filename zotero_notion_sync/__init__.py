@@ -215,9 +215,15 @@ def find_notion_id(text: str):
 def get_all_zotero_papers(zotero: Zotero) -> List[Paper]:
     all_notes = zotero.everything(zotero.items(itemType="note"))
 
-    top_papers = {
-        item["data"]["key"]: zotero_item_to_paper(item) for item in zotero.all_top()
-    }
+    top_papers = {}
+
+    for item in zotero.all_top():
+        key = item["data"]["key"]
+        try:
+            top_papers[key] = zotero_item_to_paper(item)
+        except KeyError as e:
+            logging.error(f"Can't process Zotero item {key}")
+            logging.exception(e)
 
     for item in all_notes:
         if [{"tag": "notion-link"}] == item["data"]["tags"]:
