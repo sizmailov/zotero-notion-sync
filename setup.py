@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="zotero-notion-sync",
-    version="0.1",
+    version="0.1.1",
     packages=["zotero_notion_sync"],
     install_requires=required,
     entry_points={
