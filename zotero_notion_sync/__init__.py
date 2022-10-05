@@ -179,7 +179,10 @@ def zotero_item_to_web_reader_url(item: dict) -> str:
     key = item["key"]
     group_id = item["library"]["id"]
     attachment_id = find_pdf_attachment_id(item)
-    return f"https://www.zotero.org/groups/{group_id}/items/{key}/attachment/{attachment_id}/reader"
+    return (
+        f"https://www.zotero.org/groups/{group_id}/"
+        f"items/{key}/attachment/{attachment_id}/reader"
+    )
 
 
 def zotero_author_to_str(author: dict) -> str:
