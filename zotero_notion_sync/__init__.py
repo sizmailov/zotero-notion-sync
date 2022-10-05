@@ -16,7 +16,8 @@ TITLE = "Title"
 AUTHORS = "Authors"
 LINK = "Link"
 PUBLISHED_AT = "Published at"
-ZOTERO_URL = "Zotero URL"
+ZOTERO_URL = "Zotero 🖥️"
+ZOTERO_WEB_URL = "Zotero 🌐"
 ZOTERO_ITEM_ID = "Zotero ItemID"
 
 
@@ -27,6 +28,7 @@ class Paper:
     link: Optional[str]
     published_at: Optional[str]
     zotero_url: str
+    zotero_web_reader_url: str
     zotero_item_id: str
     notion_id: Optional[str]
 
@@ -42,6 +44,7 @@ class Paper:
             and self.link == other.link
             and self.published_at == other.published_at
             and self.zotero_url == other.zotero_url
+            and self.zotero_web_reader_url == other.zotero_web_reader_url
             and self.zotero_item_id == other.zotero_item_id
         )
 
@@ -69,6 +72,13 @@ def notion_object_to_str(obj: dict):
     raise RuntimeError(f"Unexpected `{type_}` type")
 
 
+def get_zotero_web_reader_url_from_notion_page_props(props: dict) -> str:
+    try:
+        return notion_object_to_str(props[ZOTERO_WEB_URL])
+    except KeyError:
+        return ""
+
+
 def notion_page_to_paper(page: dict) -> Paper:
     assert page["object"] == "page"
     props = page["properties"]
@@ -77,6 +87,7 @@ def notion_page_to_paper(page: dict) -> Paper:
         authors=notion_object_to_str(props[AUTHORS]),
         published_at=notion_object_to_str(props[PUBLISHED_AT]) or None,
         zotero_url=notion_object_to_str(props[ZOTERO_URL]),
+        zotero_web_reader_url=get_zotero_web_reader_url_from_notion_page_props(props),
         zotero_item_id=notion_object_to_str(props[ZOTERO_ITEM_ID]),
         link=notion_object_to_str(props[LINK]),
         notion_id=page["id"].replace("-", ""),
@@ -124,6 +135,7 @@ def paper_to_notion_properties(paper):
         TITLE: {"title": [{"text": {"content": paper.title}}]},
         AUTHORS: to_rich_text_dict(paper.authors),
         ZOTERO_URL: {"url": paper.zotero_url},
+        ZOTERO_WEB_URL: {"url": paper.zotero_web_reader_url},
         ZOTERO_ITEM_ID: to_rich_text_dict(paper.zotero_item_id),
     }
     if paper.link:
@@ -151,6 +163,25 @@ def zotero_item_to_url(item: dict) -> str:
     return f"https://open-zotero.xyz/select/groups/{group_id}/items/{key}"
 
 
+def find_pdf_attachment_id(item: dict) -> Optional[str]:
+    try:
+        attachment = item["links"]["attachment"]
+    except KeyError:
+        return None
+    if attachment["attachmentType"] == "application/pdf":
+        link = attachment["href"]
+        m = re.search(r"/items/(\w+)", link, flags=re.IGNORECASE)
+        if m is not None:
+            return m.group(1)
+
+
+def zotero_item_to_web_reader_url(item: dict) -> str:
+    key = item["key"]
+    group_id = item["library"]["id"]
+    attachment_id = find_pdf_attachment_id(item)
+    return f"https://www.zotero.org/groups/{group_id}/items/{key}/attachment/{attachment_id}/reader"
+
+
 def zotero_author_to_str(author: dict) -> str:
     if "name" in author:
         return author["name"]
@@ -170,6 +201,7 @@ def zotero_item_to_paper(item: dict) -> Optional[Paper]:
         title=data["title"],
         zotero_item_id=key,
         zotero_url=zotero_item_to_url(item),
+        zotero_web_reader_url=zotero_item_to_web_reader_url(item),
         authors=", ".join(
             zotero_author_to_str(author)
             for author in data["creators"]

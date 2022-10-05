@@ -22,7 +22,7 @@ At synchronization `sync-zotero-notion`:
 
 ### Setup
 #### Notion
-1. Create Notion database with `Title`, `Authors`, `Link`, `Published at`, `Zotero URL`, `Zotero ItemID` fields.
+1. Create Notion database with `Title`, `Authors`, `Link`, `Published at`, `Zotero 🖥️`, `Zotero 🌐`, `Zotero ItemID` fields.
 2. Create [integration token](https://www.notion.so/my-integrations/) with read/write permissions
 3. Share database with integration (from top-right conner of database page):
 ![Share database with integration](images/share-with-integration.png)
